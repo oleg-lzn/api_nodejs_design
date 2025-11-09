@@ -1,4 +1,3 @@
-// src/middleware/errorHandler.ts
 import { logger } from "../utils/logger.ts";
 
 export function errorHandler(err, req, res, next) {

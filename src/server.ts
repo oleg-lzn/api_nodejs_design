@@ -8,10 +8,22 @@ import helmet from "helmet";
 import { basicLimiter } from "./middlewares/rateLimiter.ts";
 import morgan from "morgan";
 import { errorHandler } from "./middlewares/errorHandler.ts";
+import cors from "cors";
+import redisLimiter from "./middlewares/redisRateLimiter.ts";
 
 const app = express();
 
-//healthcheck
+app.use(helmet()); // basic security
+app.use(cors()); // cors policy
+app.use(cookieParser()); // access to cookies
+app.use(express.json()); // parse json bodies
+app.use(basicLimiter); // rate limiting
+app.use(redisLimiter); // redis rate limiter
+app.use(morgan("combined")); // logging
+app.use(errorHandler); // error handling
+// app.use(authenticate) // check authentication
+
+//health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: 200,
@@ -50,14 +62,9 @@ app.get("/health", (req, res) => {
 // })
 
 //middlewares
-app.use(cookieParser()); // access to cookies
-app.use(express.json()); // reading jsons
-app.use(helmet); // basic defense
-app.use(basicLimiter); // rate limiting
-app.use(morgan("dev")); // logging
-app.use(errorHandler); // error handling
 
 //routes
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/habits", habitRoutes);
