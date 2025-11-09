@@ -11,4 +11,8 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.post("/cake", (req, res) => {
+  res.status(200).send("ok");
+});
+
 export default app;
