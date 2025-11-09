@@ -10,6 +10,7 @@ import morgan from "morgan";
 import { errorHandler } from "./middlewares/errorHandler.ts";
 import cors from "cors";
 import redisLimiter from "./middlewares/redisRateLimiter.ts";
+import { isTest } from "../env.ts";
 
 const app = express();
 
@@ -17,9 +18,14 @@ app.use(helmet()); // basic security
 app.use(cors()); // cors policy
 app.use(cookieParser()); // access to cookies
 app.use(express.json()); // parse json bodies
-app.use(basicLimiter); // rate limiting
+app.use(express.urlencoded({ extended: true })); // for content types in the body and the query strings
+app.use(basicLimiter); // basic rate limiting
 app.use(redisLimiter); // redis rate limiter
-app.use(morgan("combined")); // logging
+app.use(
+  morgan("dev", {
+    skip: () => isTest(),
+  })
+); // logging
 app.use(errorHandler); // error handling
 // app.use(authenticate) // check authentication
 

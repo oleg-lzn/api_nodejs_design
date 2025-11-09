@@ -1,4 +1,10 @@
 import { Router } from "express";
+import { validateBody } from "../middlewares/inputMiddleware.ts";
+import { z } from "zod";
+
+const createHabitSchema = z.object({
+  name: z.string(),
+});
 
 const router = Router();
 
@@ -18,7 +24,7 @@ router.get("/:id", (req, res) => {
   });
 });
 
-router.post("/", (req, res) => {
+router.post("/", validateBody(createHabitSchema), (req, res) => {
   res.status(201).json({
     message: "habit created",
   });
