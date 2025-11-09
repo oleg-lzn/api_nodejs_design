@@ -30,3 +30,5 @@ router.delete("/:id", (req, res) => {
     message: "user deleted",
   });
 });
+
+export default router;

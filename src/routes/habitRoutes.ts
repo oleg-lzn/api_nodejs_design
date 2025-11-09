@@ -35,3 +35,5 @@ router.post("/:id/complete", (req, res) => {
     message: "habitcompleted",
   });
 });
+
+export default router;

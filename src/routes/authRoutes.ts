@@ -3,11 +3,11 @@ import { Router } from "express";
 const router = Router();
 
 router.post("/register", (req, res) => {
-  res.status(201).json({ message: "user Signed up" });
+  res.status(201).json({ message: "user signed up" });
 });
 
 router.post("/login", (req, res) => {
-  res.status(200).json({ message: "user Signed in" });
+  res.status(200).json({ message: "user signed in" });
 });
 
 export default router;
