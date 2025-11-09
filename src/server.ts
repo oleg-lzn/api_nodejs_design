@@ -3,7 +3,11 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import habitRoutes from "./routes/habitRoutes.ts";
-import tagRoutes from "./routes/tagRoutes.ts";
+// import tagRoutes from "./routes/tagRoutes.ts";
+import helmet from "helmet";
+import { basicLimiter } from "./middlewares/rateLimiter.ts";
+import morgan from "morgan";
+import { errorHandler } from "./middlewares/errorHandler.ts";
 
 const app = express();
 
@@ -46,17 +50,21 @@ app.get("/health", (req, res) => {
 // })
 
 //middlewares
-app.use(cookieParser());
-app.use(express.json());
+app.use(cookieParser()); // access to cookies
+app.use(express.json()); // reading jsons
+app.use(helmet); // basic defense
+app.use(basicLimiter); // rate limiting
+app.use(morgan("dev")); // logging
+app.use(errorHandler); // error handling
 
 //routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/habits", habitRoutes);
-app.use("/api/tags", tagRoutes);
+// app.use("/api/tags", tagRoutes);
 
 // 404 handler for API routes
-app.use("/api/*", (req, res) => {
+app.use(/^\/api\/.*/, (req, res) => {
   res.status(404).json({
     error: "Not Found",
     message: `Cannot ${req.method} ${req.originalUrl}`,
