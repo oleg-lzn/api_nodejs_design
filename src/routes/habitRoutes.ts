@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { validateBody } from "../middlewares/inputMiddleware.ts";
+import { validateBody, validateParams } from "../middlewares/validation.ts";
 import { z } from "zod";
 
 const createHabitSchema = z.object({
   name: z.string(),
+});
+
+const completeParamsSchema = z.object({
+  id: z.string,
 });
 
 const router = Router();
@@ -36,10 +40,15 @@ router.delete("/:id", (req, res) => {
   });
 });
 
-router.post("/:id/complete", (req, res) => {
-  res.status(200).json({
-    message: "habitcompleted",
-  });
-});
+router.post(
+  "/:id/complete",
+  validateBody(createHabitSchema),
+  validateParams(completeParamsSchema),
+  (req, res) => {
+    res.status(200).json({
+      message: "habitcompleted",
+    });
+  }
+);
 
 export default router;
