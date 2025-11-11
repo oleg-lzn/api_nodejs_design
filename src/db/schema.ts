@@ -8,6 +8,7 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -96,3 +97,33 @@ export const habitTagsRelations = relations(habitTags, ({ one }) => ({
     references: [tags.id],
   }),
 }));
+
+// Inferred types from the schemas
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+export type Habit = typeof habits.$inferSelect;
+export type NewHabit = typeof habits.$inferInsert;
+
+export type Tag = typeof tags.$inferSelect;
+export type NewTag = typeof tags.$inferInsert;
+
+export type Entry = typeof entries.$inferSelect;
+export type NewEntry = typeof entries.$inferInsert;
+
+export type HabitTag = typeof habitTags.$inferSelect;
+export type NewHabitTag = typeof habitTags.$inferInsert;
+
+// Inferred Zod schemas for input data validation
+export const insertUserSchema = createInsertSchema(users);
+export const selectUserSchema = createSelectSchema(users);
+
+export const insertHabitSchema = createInsertSchema(habits);
+export const selectHabitSchema = createSelectSchema(habits);
+
+export const insertTagSchema = createInsertSchema(tags);
+export const selectTagSchema = createSelectSchema(tags);
+
+export const insertHabitTagSchema = createInsertSchema(habitTags);
+export const selectHabitTagSchema = createSelectSchema(habitTags);
