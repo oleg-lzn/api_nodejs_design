@@ -35,7 +35,7 @@ export const habits = pgTable("habits", {
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
-const entries = pgTable("entries", {
+export const entries = pgTable("entries", {
   id: uuid("id").primaryKey().defaultRandom(),
   habitId: uuid("habit_id")
     .references(() => habits.id, { onDelete: "cascade" })
