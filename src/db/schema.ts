@@ -28,7 +28,7 @@ export const habits = pgTable("habits", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   description: text("description"),
-  frequency: varchar("frequenct", { length: 50 }).notNull(),
+  frequency: varchar("frequency", { length: 50 }).notNull(),
   targetCount: integer("target_count").default(1),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
