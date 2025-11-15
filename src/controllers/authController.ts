@@ -1,23 +1,42 @@
 import type { Request, Response } from "express";
-import bcrypt from "bcrypt";
 import { db } from "../db/connection.ts";
-import { users } from "../db/schema.ts";
+import { users, type NewUser } from "../db/schema.ts";
 import { hashPassword } from "../utils/password.ts";
 import { generateToken } from "../utils/jwt.ts";
 
-const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request<any, any, NewUser>,
+  res: Response
+) => {
   try {
-    const { userName, password, email } = req.body;
-    const hashedPassword = hashPassword(password);
+    const { username, password, email, firstName, lastName } = req.body;
+    const hashedPassword = await hashPassword(password);
 
-    const user = await db
+    const [user] = await db
       .insert(users)
       .values({
-        userName,
-        hashPassword,
         email,
+        username,
+        password: hashedPassword,
+        firstName,
+        lastName,
       })
-      .returning();
+      .returning({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        createdAt: users.createdAt,
+      });
+
+    const token = await generateToken({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    });
+
+    return res.status(201).json({ message: "User Created", user, token });
   } catch (e) {
     // check for duplicate error from the not unique email
     console.error("Registration error", e);
