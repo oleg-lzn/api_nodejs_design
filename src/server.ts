@@ -10,7 +10,10 @@ import morgan from "morgan";
 import { errorHandler } from "./middlewares/errorHandler.ts";
 import cors from "cors";
 import redisLimiter from "./middlewares/redisRateLimiter.ts";
-import { isTest } from "../env.ts";
+import env, { isTest } from "../env.ts";
+import db from "./db/connection.ts";
+import { redisClient } from "./middlewares/redisRateLimiter.ts";
+import { sql } from "drizzle-orm";
 
 const app = express();
 
@@ -27,45 +30,44 @@ app.use(
   })
 ); // logging
 app.use(errorHandler); // error handling
-// app.use(authenticate) // check authentication
 
 //health check
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: 200,
-    message: "Server is Running",
-    timestamp: new Date().toISOString(),
-    service: "Api Practice",
-  });
+// app.get("/health", (req, res) => {
+//   res.status(200).json({
+//     status: 200,
+//     message: "Server is Running",
+//     timestamp: new Date().toISOString(),
+//     service: "Api Practice",
+//   });
+// });
+
+// Detailed health check
+app.get("/health", async (req, res) => {
+  try {
+    // Check database connection
+    await db.execute(sql`SELECT 1`);
+
+    // Check external services
+    const redisStatus = await redisClient.ping();
+
+    res.status(200).json({
+      status: "OK",
+      timestamp: new Date().toISOString(),
+      services: {
+        database: "connected",
+        redis: redisStatus === "PONG" ? "connected" : "disconnected",
+      },
+      version: env.APP_STAGE,
+      uptime: process.uptime(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: "ERROR",
+      message: "Service unhealthy",
+      error: error.message,
+    });
+  }
 });
-
-// // Detailed health check
-// app.get('/health/detailed', async (req, res) => {
-//   try {
-//     // Check database connection
-//     await db.raw('SELECT 1')
-
-//     // Check external services
-//     const redisStatus = await redis.ping()
-
-//     res.status(200).json({
-//       status: 'OK',
-//       timestamp: new Date().toISOString(),
-//       services: {
-//         database: 'connected',
-//         redis: redisStatus === 'PONG' ? 'connected' : 'disconnected',
-//       },
-//       version: process.env.APP_VERSION,
-//       uptime: process.uptime(),
-//     })
-//   } catch (error) {
-//     res.status(503).json({
-//       status: 'ERROR',
-//       message: 'Service unhealthy',
-//       error: error.message,
-//     })
-//   }
-// })
 
 //middlewares
 

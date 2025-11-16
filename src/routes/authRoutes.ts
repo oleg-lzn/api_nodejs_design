@@ -7,7 +7,6 @@ import { loginSchema } from "../middlewares/validation.ts";
 const router = Router();
 
 router.post("/register", validateBody(insertUserSchema), register);
-
 router.post("/login", validateBody(loginSchema), login);
 
 export default router;

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { validateBody, validateParams } from "../middlewares/validation.ts";
 import { z } from "zod";
+import { authenticateToken } from "../middlewares/authMiddleware.ts";
 
 const createHabitSchema = z.object({
   name: z.string(),
@@ -11,6 +12,7 @@ const completeParamsSchema = z.object({
 });
 
 const router = Router();
+router.use(authenticateToken); // everything below runs an authenticate middleware
 
 router.get("/", (req, res) => {
   res.status(200).json({

@@ -3,7 +3,7 @@ import Redis from "ioredis";
 import type { Request, Response, NextFunction } from "express";
 import { env } from "../../env.ts";
 
-const redisClient = new Redis(env.REDIS_URL || "redis://localhost:6379");
+export const redisClient = new Redis(env.REDIS_URL || "redis://localhost:6379");
 
 const rateLimiter = new RateLimiterRedis({
   storeClient: redisClient,
