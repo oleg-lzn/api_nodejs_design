@@ -1,4 +1,4 @@
-import { type ZodSchema, ZodError } from "zod";
+import z, { type ZodSchema, ZodError } from "zod";
 import type { Request, Response, NextFunction } from "express";
 
 export const validateBody = (schema: ZodSchema) => {
@@ -61,3 +61,8 @@ export const validateQuery = (schema: ZodSchema) => {
     }
   };
 };
+
+export const loginSchema = z.object({
+  email: z.email("Invalid e-mail"),
+  password: z.string().min(6, "Password is required"),
+});
