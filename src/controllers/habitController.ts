@@ -37,3 +37,33 @@ export const createHabit = async (req: AuthenticatedRequest, res: Response) => {
     res.status(500).json({ error: "Server Error" });
   }
 };
+
+export const getHabits = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const user = req.user;
+    const userHabitsWithTags = await db.query.habits.findMany({
+      where: eq(habits.userId, user.id),
+      with: {
+        habitTags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: [desc(habits.createdAt)],
+    });
+
+    const habitsWithTags = userHabitsWithTags.map((habit) => ({
+      ...habit,
+      tags: habit.habitTags.map((ht) => ht.tag),
+      habitTags: undefined,
+    }));
+
+    res
+      .status(200)
+      .json({ message: "Successfully got habits", habits: habitsWithTags });
+  } catch (e) {
+    console.error("Error getting habits", e);
+    res.status(500).json({ error: "Error getting habits" });
+  }
+};

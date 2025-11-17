@@ -66,3 +66,11 @@ export const loginSchema = z.object({
   email: z.email("Invalid e-mail"),
   password: z.string().min(6, "Password is required"),
 });
+
+export const createHabitSchema = z.object({
+  name: z.string(), // required
+  description: z.string().optional(),
+  frequency: z.string(), // required
+  targetCount: z.string().optional(),
+  tagIds: z.array(z.string()).optional(),
+});

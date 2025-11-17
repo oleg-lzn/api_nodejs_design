@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { validateBody, validateParams } from "../middlewares/validation.ts";
+import {
+  createHabitSchema,
+  validateBody,
+  validateParams,
+} from "../middlewares/validation.ts";
 import { z } from "zod";
 import { authenticateToken } from "../middlewares/authMiddleware.ts";
-
-const createHabitSchema = z.object({
-  name: z.string(),
-});
+import { createHabit, getHabits } from "../controllers/habitController.ts";
 
 const completeParamsSchema = z.object({
   id: z.string,
@@ -14,12 +15,8 @@ const completeParamsSchema = z.object({
 const router = Router();
 router.use(authenticateToken); // everything below runs an authenticate middleware
 
-router.get("/", (req, res) => {
-  res.status(200).json({
-    message: "success",
-    data: "something",
-  });
-});
+// Get all the habits
+router.get("/", getHabits);
 
 router.get("/:id", (req, res) => {
   const { id } = req.params;
@@ -30,11 +27,8 @@ router.get("/:id", (req, res) => {
   });
 });
 
-router.post("/", validateBody(createHabitSchema), (req, res) => {
-  res.status(201).json({
-    message: "habit created",
-  });
-});
+// Create a habit
+router.post("/", validateBody(createHabitSchema), createHabit);
 
 router.delete("/:id", (req, res) => {
   res.status(204).json({
