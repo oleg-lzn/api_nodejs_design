@@ -74,3 +74,16 @@ export const createHabitSchema = z.object({
   targetCount: z.string().optional(),
   tagIds: z.array(z.string()).optional(),
 });
+
+export const completeParamsSchema = z.object({
+  id: z.string,
+});
+
+export const updateHabitSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  description: z.string().optional().nullable(),
+  frequency: z.string().min(1).max(50).optional(),
+  targetCount: z.number().int().min(1).optional(),
+  isActive: z.boolean().optional(),
+  tagIds: z.array(z.string().uuid()).optional(),
+});
