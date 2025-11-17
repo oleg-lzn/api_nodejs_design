@@ -112,8 +112,34 @@ export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
           ...updates,
           updatedAt: new Date(),
         })
-        .where(and(eq(habits.userId, user.id), eq(habits.id, id)));
+        .where(and(eq(habits.userId, user.id), eq(habits.id, id)))
+        .returning();
+
+      if (!updatedHabit) {
+        return res
+          .status(401)
+          .json({ message: "Error updating a habit" })
+          .end();
+      }
+
+      if (tagIds !== undefined) {
+        await tx.delete(habitTags).where(eq(habitTags.habitId, id));
+
+        if (tagIds.length > 0) {
+          const habitTagValues = tagIds.map((tagId) => ({
+            habitId: id,
+            tagId,
+          }));
+          await tx.insert(habitTags).values(habitTagValues);
+        }
+      }
+
+      return updatedHabit;
     });
+
+    res
+      .status(200)
+      .json({ message: "Habit successfully update", habit: result });
   } catch (e) {
     console.error("Error updating the habit", e);
     res.status(500).json({ error: "Failed to update the habit" });
