@@ -67,3 +67,55 @@ export const getHabits = async (req: AuthenticatedRequest, res: Response) => {
     res.status(500).json({ error: "Error getting habits" });
   }
 };
+
+export const getOneHabit = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const user = req.user;
+    const id = req.params.id;
+
+    const userHabit = await db.query.habits.findFirst({
+      where: and(eq(habits.userId, user.id), eq(habits.id, id)),
+      with: {
+        habitTags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    const userHabitWithTags = {
+      ...userHabit,
+      tags: userHabit.habitTags.map((ht) => ht.tag),
+      habitTags: undefined,
+    };
+
+    res
+      .status(200)
+      .json({ message: "Successfully got habits", habit: userHabitWithTags });
+  } catch (e) {
+    console.error("Error getting habits", e);
+    res.status(500).json({ error: "Error getting habits" });
+  }
+};
+
+export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { tagIds, ...updates } = req.body;
+    const id = req.params.id;
+    const user = req.user;
+
+    const result = await db.transaction(async (tx) => {
+      const [updatedHabit] = await tx
+        .update(habits)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(habits.userId, user.id), eq(habits.id, id)));
+    });
+  } catch (e) {
+    console.error("Error updating the habit", e);
+    res.status(500).json({ error: "Failed to update the habit" });
+  }
+};
