@@ -2,6 +2,7 @@ import { RateLimiterRedis } from "rate-limiter-flexible";
 import Redis from "ioredis";
 import type { Request, Response, NextFunction } from "express";
 import { env } from "../../env.ts";
+import { APIError } from "./errorHandler.ts";
 
 export const redisClient = new Redis(env.REDIS_URL || "redis://localhost:6379");
 
@@ -21,7 +22,7 @@ export async function redisRateLimiter(
     await rateLimiter.consume(req.ip);
     next();
   } catch {
-    res.status(429).json({ message: "Too many requests" });
+    throw new APIError("Too many requests", 429, "Server Error");
   }
 }
 

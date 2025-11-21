@@ -3,7 +3,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import habitRoutes from "./routes/habitRoutes.ts";
-// import tagRoutes from "./routes/tagRoutes.ts";
+import tagRoutes from "./routes/tagRoutes.ts";
 import helmet from "helmet";
 import { basicLimiter } from "./middlewares/rateLimiter.ts";
 import morgan from "morgan";
@@ -14,6 +14,7 @@ import env, { isTest } from "../env.ts";
 import db from "./db/connection.ts";
 import { redisClient } from "./middlewares/redisRateLimiter.ts";
 import { sql } from "drizzle-orm";
+import { notFound } from "./middlewares/notFound.ts";
 
 const app = express();
 
@@ -30,12 +31,8 @@ app.use(
   })
 ); // logging
 
-// app.use((_, __, next) => {
-//   next(new APIError("validation error", 400, "validationError"));
-// }); // error handling
-
 // Detailed health check
-app.get("/health", async (req, res) => {
+app.get("/health", async (_, res) => {
   try {
     // Check database connection
     await db.execute(sql`SELECT 1`);
@@ -54,29 +51,19 @@ app.get("/health", async (req, res) => {
       uptime: process.uptime(),
     });
   } catch (error) {
-    res.status(503).json({
-      status: "ERROR",
-      message: "Service unhealthy",
-      error: error.message,
-    });
+    throw new APIError("Internal server Error", 500, "Server Error");
   }
 });
 
-//routes
+//Routes
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/habits", habitRoutes);
-// app.use("/api/tags", tagRoutes);
+app.use("/api/tags", tagRoutes);
 
-// 404 handler for API routes
-app.use(/^\/api\/.*/, (req, res) => {
-  res.status(404).json({
-    error: "Not Found",
-    message: `Cannot ${req.method} ${req.originalUrl}`,
-    timestamp: new Date().toISOString(),
-  });
-});
+// 404 handler
+app.use(notFound);
 
 app.use(errorHandler);
 

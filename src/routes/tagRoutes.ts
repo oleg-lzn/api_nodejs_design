@@ -6,7 +6,6 @@ import {
   createTagSchema,
   updateTagSchema,
 } from "../middlewares/validation.ts";
-import { z } from "zod";
 import {
   createTag,
   getTags,
