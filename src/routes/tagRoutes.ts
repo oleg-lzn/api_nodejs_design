@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authenticateToken } from "../middleware/auth.ts";
-import { validateBody, validateParams } from "../middleware/validation.ts";
+import { authenticateToken } from "../middlewares/authMiddleware.ts";
+import { validateBody, validateParams } from "../middlewares/validation.ts";
 import {
   completeParamsSchema,
   createTagSchema,

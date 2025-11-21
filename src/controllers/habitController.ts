@@ -3,6 +3,7 @@ import db from "../db/connection.ts";
 import { habits, entries, habitTags, tags } from "../db/schema.ts";
 import { type AuthenticatedRequest } from "../middlewares/authMiddleware.ts";
 import { eq, and, desc, inArray } from "drizzle-orm";
+import { APIError } from "../middlewares/errorHandler.ts";
 
 export const createHabit = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -34,7 +35,7 @@ export const createHabit = async (req: AuthenticatedRequest, res: Response) => {
     res.status(201).json({ message: "habit created", habit: result });
   } catch (e) {
     console.error("Creating habit error", e);
-    res.status(500).json({ error: "Server Error" });
+    throw new APIError("Failed to create a habit", 500, "Server Error");
   }
 };
 
@@ -64,7 +65,7 @@ export const getHabits = async (req: AuthenticatedRequest, res: Response) => {
       .json({ message: "Successfully got habits", habits: habitsWithTags });
   } catch (e) {
     console.error("Error getting habits", e);
-    res.status(500).json({ error: "Error getting habits" });
+    throw new APIError("Failed to get habits", 500, "Server Error");
   }
 };
 
@@ -89,7 +90,7 @@ export const getOneHabit = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     if (!userHabit) {
-      return res.status(404).json({ error: "Habit not found" });
+      throw new APIError("Habit not found", 404, "Server Error");
     }
 
     const userHabitWithTags = {
@@ -103,7 +104,7 @@ export const getOneHabit = async (req: AuthenticatedRequest, res: Response) => {
       .json({ message: "Successfully got habits", habit: userHabitWithTags });
   } catch (e) {
     console.error("Error getting habits", e);
-    res.status(500).json({ error: "Error getting habits" });
+    throw new APIError("Failed to get a habit", 500, "Server Error");
   }
 };
 
@@ -124,10 +125,7 @@ export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
         .returning();
 
       if (!updatedHabit) {
-        return res
-          .status(401)
-          .json({ message: "Error updating a habit" })
-          .end();
+        throw new APIError("Error updating a habit", 401, "Error");
       }
 
       if (tagIds !== undefined) {
@@ -150,7 +148,7 @@ export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
       .json({ message: "Habit successfully update", habit: result });
   } catch (e) {
     console.error("Error updating the habit", e);
-    res.status(500).json({ error: "Failed to update the habit" });
+    throw new APIError("Failed to create a habit", 500, "Server Error");
   }
 };
 
@@ -174,6 +172,6 @@ export const deleteHabit = async (req: AuthenticatedRequest, res: Response) => {
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to delete habit" });
+    throw new APIError("Failed to delete a habit", 500, "Server Error");
   }
 };

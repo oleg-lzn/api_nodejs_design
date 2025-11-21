@@ -3,6 +3,7 @@ import db from "../db/connection.ts";
 import { tags } from "../db/schema.ts";
 import type { Request, Response } from "express";
 import type { AuthenticatedRequest } from "../middlewares/authMiddleware.ts";
+import { APIError } from "../middlewares/errorHandler.ts";
 
 export const getTags = async (req: Request, res: Response) => {
   try {
@@ -13,7 +14,7 @@ export const getTags = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get tags error:", error);
-    res.status(500).json({ error: "Failed to fetch tags" });
+    throw new APIError("Failed to fetch tags", 500, "Server Error");
   }
 };
 
@@ -40,7 +41,7 @@ export const getTagById = async (req: Request, res: Response) => {
     });
 
     if (!tag) {
-      return res.status(404).json({ error: "Tag not found" });
+      throw new APIError("Tag not found", 404, "Server Error");
     }
 
     // Transform the data
@@ -55,7 +56,7 @@ export const getTagById = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get tag error:", error);
-    res.status(500).json({ error: "Failed to fetch tag" });
+    throw new APIError("Failed to fetch a tag", 500, "Server Error");
   }
 };
 
@@ -71,9 +72,11 @@ export const updateTag = async (req: AuthenticatedRequest, res: Response) => {
       });
 
       if (existingTag && existingTag.id !== id) {
-        return res
-          .status(409)
-          .json({ error: "Tag with this name already exists" });
+        throw new APIError(
+          "Tag with this name already exists",
+          409,
+          "Server Error"
+        );
       }
     }
 
@@ -88,7 +91,7 @@ export const updateTag = async (req: AuthenticatedRequest, res: Response) => {
       .returning();
 
     if (!updatedTag) {
-      return res.status(404).json({ error: "Tag not found" });
+      throw new APIError("Tag not found", 404, "Server Error");
     }
 
     res.json({
@@ -97,7 +100,7 @@ export const updateTag = async (req: AuthenticatedRequest, res: Response) => {
     });
   } catch (error) {
     console.error("Update tag error:", error);
-    res.status(500).json({ error: "Failed to update tag" });
+    throw new APIError("Failed to update a tag", 500, "Server Error");
   }
 };
 
@@ -111,7 +114,7 @@ export const deleteTag = async (req: AuthenticatedRequest, res: Response) => {
       .returning();
 
     if (!deletedTag) {
-      return res.status(404).json({ error: "Tag not found" });
+      throw new APIError("Tag not found", 404, "Server Error");
     }
 
     res.json({
@@ -119,7 +122,7 @@ export const deleteTag = async (req: AuthenticatedRequest, res: Response) => {
     });
   } catch (error) {
     console.error("Delete tag error:", error);
-    res.status(500).json({ error: "Failed to delete tag" });
+    throw new APIError("Failed to delete a tag", 500, "Server Error");
   }
 };
 
@@ -150,7 +153,7 @@ export const getPopularTags = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get popular tags error:", error);
-    res.status(500).json({ error: "Failed to fetch popular tags" });
+    throw new APIError("Failed to delete a tag", 500, "Server Error");
   }
 };
 
@@ -164,9 +167,11 @@ export const createTag = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     if (existingTag) {
-      return res
-        .status(409)
-        .json({ error: "Tag with this name already exists" });
+      throw new APIError(
+        "Tag with this name already exists",
+        409,
+        "Server Error"
+      );
     }
 
     const [newTag] = await db
@@ -183,6 +188,6 @@ export const createTag = async (req: AuthenticatedRequest, res: Response) => {
     });
   } catch (error) {
     console.error("Create tag error:", error);
-    res.status(500).json({ error: "Failed to create tag" });
+    throw new APIError("Failed to create a tag", 500, "Server Error");
   }
 };

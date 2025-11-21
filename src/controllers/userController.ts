@@ -4,6 +4,7 @@ import type { AuthenticatedRequest } from "../middlewares/authMiddleware.ts";
 import { users } from "../db/schema.ts";
 import { and, eq } from "drizzle-orm";
 import { comparePassword, hashPassword } from "../utils/password.ts";
+import { APIError } from "../middlewares/errorHandler.ts";
 
 export const getUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -23,13 +24,13 @@ export const getUser = async (req: AuthenticatedRequest, res: Response) => {
       .where(eq(users.id, currentUser.id));
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      throw new APIError("User not found", 404, "Server Error");
     }
 
     res.json({ user });
   } catch (e) {
     console.error("Error getting the user", e);
-    res.status(500).json({ error: "Error getting the user" });
+    throw new APIError("Error getting the user", 500, "Server Error");
   }
 };
 
@@ -66,7 +67,7 @@ export const updateProfile = async (
     });
   } catch (error) {
     console.error("Update profile error:", error);
-    res.status(500).json({ error: "Failed to update profile" });
+    throw new APIError("Failed to update the user", 500, "Server Error");
   }
 };
 
@@ -81,14 +82,14 @@ export const changePassword = async (
     const [user] = await db.select().from(users).where(eq(users.id, userId));
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      throw new APIError("User not found", 404, "Server Error");
     }
 
     // verify current password
     const isVerified = await comparePassword(user.password, currentPassword);
 
     if (!isVerified) {
-      return res.status(404).json({ error: "Current password is incorrect" });
+      throw new APIError("Current password is incorrect", 400, "Server Error");
     }
 
     // hash new password
@@ -108,7 +109,7 @@ export const changePassword = async (
     });
   } catch (e) {
     console.error("Change password error:", e);
-    res.status(500).json({ error: "Failed to change password" });
+    throw new APIError("Failed to update the password", 500, "Server Error");
   }
 };
 
@@ -118,9 +119,11 @@ export const deleteUser = async (req: AuthenticatedRequest, res: Response) => {
     const id = req.params.id;
 
     if (id !== user.id) {
-      return res.status(403).json({
-        error: "You are not allowed to delete another user",
-      });
+      throw new APIError(
+        "You are not allowed to delete this user",
+        403,
+        "Server Error"
+      );
     }
 
     const [deletedUser] = await db
@@ -129,7 +132,7 @@ export const deleteUser = async (req: AuthenticatedRequest, res: Response) => {
       .returning();
 
     if (!deletedUser) {
-      return res.status(404).json({ error: "User not found" });
+      throw new APIError("User not found", 404, "Server Error");
     }
 
     res.json({
@@ -137,6 +140,6 @@ export const deleteUser = async (req: AuthenticatedRequest, res: Response) => {
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to delete a user" });
+    throw new APIError("Error deleting the user", 500, "Server Error");
   }
 };

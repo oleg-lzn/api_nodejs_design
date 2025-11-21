@@ -7,7 +7,7 @@ import habitRoutes from "./routes/habitRoutes.ts";
 import helmet from "helmet";
 import { basicLimiter } from "./middlewares/rateLimiter.ts";
 import morgan from "morgan";
-import { errorHandler } from "./middlewares/errorHandler.ts";
+import { APIError, errorHandler } from "./middlewares/errorHandler.ts";
 import cors from "cors";
 import redisLimiter from "./middlewares/redisRateLimiter.ts";
 import env, { isTest } from "../env.ts";
@@ -29,17 +29,10 @@ app.use(
     skip: () => isTest(),
   })
 ); // logging
-app.use(errorHandler); // error handling
 
-//health check
-// app.get("/health", (req, res) => {
-//   res.status(200).json({
-//     status: 200,
-//     message: "Server is Running",
-//     timestamp: new Date().toISOString(),
-//     service: "Api Practice",
-//   });
-// });
+// app.use((_, __, next) => {
+//   next(new APIError("validation error", 400, "validationError"));
+// }); // error handling
 
 // Detailed health check
 app.get("/health", async (req, res) => {
@@ -69,8 +62,6 @@ app.get("/health", async (req, res) => {
   }
 });
 
-//middlewares
-
 //routes
 
 app.use("/api/auth", authRoutes);
@@ -86,5 +77,7 @@ app.use(/^\/api\/.*/, (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use(errorHandler);
 
 export default app;

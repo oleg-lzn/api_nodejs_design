@@ -4,6 +4,7 @@ import { users, type NewUser } from "../db/schema.ts";
 import { hashPassword, comparePassword } from "../utils/password.ts";
 import { generateToken } from "../utils/jwt.ts";
 import { eq } from "drizzle-orm";
+import { APIError } from "../middlewares/errorHandler.ts";
 
 export const register = async (
   req: Request<any, any, NewUser>,
@@ -39,9 +40,12 @@ export const register = async (
 
     return res.status(201).json({ message: "User Created", user, token });
   } catch (e) {
-    // check for duplicate error from the not unique email
+    if (e.code === "23505") {
+      // check for duplicate error from the not unique email
+      throw new APIError("Email is already taken", 409, "Duplicate");
+    }
     console.error("Registration error", e);
-    res.status(500).json({ message: "Failed to create a user" });
+    throw new APIError("Failed to create a user", 500, "Server Error");
   }
 };
 
@@ -53,13 +57,13 @@ export const login = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      throw new APIError("Invalid credentials", 401, "Unauthorized");
     }
 
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      throw new APIError("Invalid credentials", 401, "Unauthorized");
     }
 
     const token = await generateToken({
@@ -81,8 +85,7 @@ export const login = async (req: Request, res: Response) => {
       token,
     });
   } catch (e) {
-    // check for duplicate error from the not unique email
     console.error("Sign in error", e);
-    res.status(500).json({ message: "Failed to sign in a user" });
+    throw new APIError("Internal server Error", 500, "Server Error");
   }
 };
