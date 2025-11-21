@@ -10,6 +10,7 @@ import { z } from "zod";
 import { authenticateToken } from "../middlewares/authMiddleware.ts";
 import {
   createHabit,
+  deleteHabit,
   getHabits,
   getOneHabit,
   updateHabit,
@@ -22,7 +23,7 @@ router.use(authenticateToken); // everything below runs an authenticate middlewa
 router.get("/", getHabits);
 
 // Get one habit
-router.get("/:id", getOneHabit);
+router.get("/:id", validateParams(completeParamsSchema), getOneHabit);
 
 // Create a habit
 router.post("/", validateBody(createHabitSchema), createHabit);
@@ -35,11 +36,7 @@ router.patch(
   updateHabit
 );
 
-router.delete("/:id", (req, res) => {
-  res.status(204).json({
-    message: "habit deleted",
-  });
-});
+router.delete("/:id", validateParams(completeParamsSchema), deleteHabit);
 
 router.post(
   "/:id/complete",

@@ -165,7 +165,7 @@ export const deleteHabit = async (req: AuthenticatedRequest, res: Response) => {
       .returning();
 
     if (!deletedHabit) {
-      res.status(404).json({ error: "Habit not found" });
+      return res.status(404).json({ error: "Habit not found" });
     }
 
     res.json({
