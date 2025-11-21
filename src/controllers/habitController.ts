@@ -81,8 +81,16 @@ export const getOneHabit = async (req: AuthenticatedRequest, res: Response) => {
             tag: true,
           },
         },
+        entries: {
+          orderBy: [desc(entries.completionDate)],
+          limit: 10, // Recent entries only
+        },
       },
     });
+
+    if (!userHabit) {
+      return res.status(404).json({ error: "Habit not found" });
+    }
 
     const userHabitWithTags = {
       ...userHabit,
@@ -143,5 +151,29 @@ export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
   } catch (e) {
     console.error("Error updating the habit", e);
     res.status(500).json({ error: "Failed to update the habit" });
+  }
+};
+
+export const deleteHabit = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = req.params.id;
+    const user = req.user;
+
+    const [deletedHabit] = await db
+      .delete(habits)
+      .where(and(eq(habits.id, id), eq(habits.userId, user.id)))
+      .returning();
+
+    if (!deletedHabit) {
+      res.status(404).json({ error: "Habit not found" });
+    }
+
+    res.json({
+      message: "Habit Deleted successfully",
+      deletedHabit: deletedHabit, // to think, should we return it
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Failed to delete habit" });
   }
 };
