@@ -1,6 +1,7 @@
 import z, { type ZodSchema, ZodError } from "zod";
 import type { Request, Response, NextFunction } from "express";
 
+// General validation schemas ( requests )
 export const validateBody = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -62,10 +63,13 @@ export const validateQuery = (schema: ZodSchema) => {
   };
 };
 
+// Validation schemas user
 export const loginSchema = z.object({
   email: z.email("Invalid e-mail"),
   password: z.string().min(6, "Password is required"),
 });
+
+// Validation schemas habits
 
 export const createHabitSchema = z.object({
   name: z.string(), // required
@@ -88,7 +92,7 @@ export const updateHabitSchema = z.object({
   tagIds: z.array(z.string().uuid()).optional(),
 });
 
-// Validation schemas
+// Validation schemas profile
 export const updateProfileSchema = z.object({
   email: z.string("Invalid email format").optional(),
   username: z
@@ -109,4 +113,25 @@ export const changePasswordSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       "Password must contain uppercase, lowercase, and number"
     ),
+});
+
+// Validation schemas tags
+export const createTagSchema = z.object({
+  name: z.string().min(1, "Tag name is required").max(50, "Name too long"),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color")
+    .optional(),
+});
+
+export const updateTagSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color")
+    .optional(),
+});
+
+export const uuidSchema = z.object({
+  id: z.string().uuid("Invalid tag ID format"),
 });
