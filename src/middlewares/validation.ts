@@ -87,3 +87,26 @@ export const updateHabitSchema = z.object({
   isActive: z.boolean().optional(),
   tagIds: z.array(z.string().uuid()).optional(),
 });
+
+// Validation schemas
+export const updateProfileSchema = z.object({
+  email: z.string("Invalid email format").optional(),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(50, "Username too long")
+    .optional(),
+  firstName: z.string().max(100).optional(),
+  lastName: z.string().max(100).optional(),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain uppercase, lowercase, and number"
+    ),
+});

@@ -2,7 +2,7 @@ import type { Response } from "express";
 import db from "../db/connection.ts";
 import type { AuthenticatedRequest } from "../middlewares/authMiddleware.ts";
 import { users } from "../db/schema.ts";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { comparePassword, hashPassword } from "../utils/password.ts";
 
 export const getUser = async (req: AuthenticatedRequest, res: Response) => {
@@ -70,7 +70,7 @@ export const updateProfile = async (
   }
 };
 
-export const changePasword = async (
+export const changePassword = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
@@ -109,5 +109,34 @@ export const changePasword = async (
   } catch (e) {
     console.error("Change password error:", e);
     res.status(500).json({ error: "Failed to change password" });
+  }
+};
+
+export const deleteUser = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const user = req.user;
+    const id = req.params.id;
+
+    if (id !== user.id) {
+      return res.status(403).json({
+        error: "You are not allowed to delete another user",
+      });
+    }
+
+    const [deletedUser] = await db
+      .delete(users)
+      .where(eq(users.id, user.id))
+      .returning();
+
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      message: "User Deleted successfully",
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Failed to delete a user" });
   }
 };

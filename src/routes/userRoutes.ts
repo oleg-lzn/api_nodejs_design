@@ -1,15 +1,32 @@
 import { Router } from "express";
 import { authenticateToken } from "../middlewares/authMiddleware.ts";
+import {
+  getUser,
+  changePassword,
+  updateProfile,
+  deleteUser,
+} from "../controllers/userController.ts";
+import {
+  updateProfileSchema,
+  validateBody,
+  changePasswordSchema,
+} from "../middlewares/validation.ts";
 
 const router = Router();
 router.use(authenticateToken);
 
-router.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Got all users",
-    data: "all the users",
-  });
-});
+// get 1 User
+router.get("/user", getUser);
+
+// Change the password
+router.post(
+  "/change-password",
+  validateBody(changePasswordSchema),
+  changePassword
+);
+
+// Update profile
+router.put("/profile", validateBody(updateProfileSchema), updateProfile);
 
 router.get("/:id", (req, res) => {
   const { id } = req.params;
@@ -27,10 +44,6 @@ router.put("/:id", (req, res) => {
   });
 });
 
-router.delete("/:id", (req, res) => {
-  res.status(204).json({
-    message: "user deleted",
-  });
-});
+router.delete("/:id", deleteUser);
 
 export default router;
