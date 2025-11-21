@@ -80,7 +80,7 @@ export const createHabitSchema = z.object({
 });
 
 export const completeParamsSchema = z.object({
-  id: z.string,
+  id: z.string(),
 });
 
 export const updateHabitSchema = z.object({
