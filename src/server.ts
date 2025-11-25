@@ -9,6 +9,7 @@ import { isTest } from "../env.ts";
 import { notFound } from "./middlewares/notFound.ts";
 import mainRouter from "./routes/indexRoutes.ts";
 import { healthController } from "./controllers/healthController.ts";
+import { basicLimiter } from "./middlewares/rateLimiter.ts";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(cors()); // cors policy
 app.use(cookieParser()); // access to cookies
 app.use(express.json()); // parse json bodies
 app.use(express.urlencoded({ extended: true })); // for content types in the body and the query strings
+app.use(basicLimiter); // basic rate limiter
 app.use(redisLimiter); // redis rate limiter
 app.use(
   morgan("dev", {

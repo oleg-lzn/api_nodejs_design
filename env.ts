@@ -26,6 +26,8 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default("7d"),
   BCRYPT_SALT_ROUNDS: z.coerce.number().min(10).max(20).default(12),
   REDIS_URL: z.string().startsWith("redis://"),
+  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().max(100),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().max(900000),
 });
 
 export type Env = z.infer<typeof envSchema>;

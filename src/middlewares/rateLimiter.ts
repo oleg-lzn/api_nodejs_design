@@ -1,8 +1,9 @@
 import rateLimit from "express-rate-limit";
+import env from "../../env.ts";
 
 export const basicLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // максимум 100 запросов за 15 минут
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max: env.RATE_LIMIT_MAX_REQUESTS,
   message: {
     status: 429,
     message: "Too many requests, please try again later.",
