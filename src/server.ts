@@ -1,7 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import { basicLimiter } from "./middlewares/rateLimiter.ts";
 import morgan from "morgan";
 import { errorHandler } from "./middlewares/errorHandler.ts";
 import cors from "cors";
@@ -36,4 +35,5 @@ app.use(notFound);
 
 app.use(errorHandler);
 
+export { app };
 export default app;
