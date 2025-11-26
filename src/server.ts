@@ -8,7 +8,10 @@ import redisLimiter from "./middlewares/redisRateLimiter.ts";
 import { isTest } from "../env.ts";
 import { notFound } from "./middlewares/notFound.ts";
 import mainRouter from "./routes/indexRoutes.ts";
-import { healthController } from "./controllers/healthController.ts";
+import {
+  emptyPathController,
+  healthController,
+} from "./controllers/healthController.ts";
 import { basicLimiter } from "./middlewares/rateLimiter.ts";
 
 const app = express();
@@ -26,8 +29,9 @@ app.use(
   })
 ); // logging
 
-// Detailed health check
+// Detailed health check and empty
 app.get("/health", healthController);
+app.get("/", emptyPathController);
 
 //Routes
 app.use("/api", mainRouter);

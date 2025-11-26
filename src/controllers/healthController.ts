@@ -27,3 +27,11 @@ export const healthController = async (_, res: Response) => {
     throw new APIError("Internal server Error", 500, "Server Error");
   }
 };
+
+export const emptyPathController = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Api is ok" });
+  } catch (error) {
+    throw new APIError("Internal server Error", 500, "Server Error");
+  }
+};
