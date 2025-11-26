@@ -2,8 +2,11 @@ import pino from "pino";
 
 export const logger = pino({
   level: "info",
-  transport: {
-    target: "pino/file",
-    options: { destination: "src/logs/app.log" },
-  },
+  transport:
+    process.env.APP_STAGE === "dev"
+      ? {
+          target: "pino-pretty",
+          options: { colorize: true },
+        }
+      : undefined,
 });
